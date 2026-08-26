@@ -1,0 +1,17 @@
+{
+  "$schema": "https://weavetab.pages.dev/schema/plugin.json",
+  "name": "weavetab-plugin-example",
+  "version": "1.0.0",
+  "description": "An enterprise template for building Weavetab plugins.",
+  "engines": {
+    "weavetab": "^2.5.0",
+    "node": ">=20.19.0"
+  },
+  "environments": [
+    "mcp"
+  ],
+  "permissions": [
+    "browser.evaluate",
+    "browser.navigate"
+  ]
+}

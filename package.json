@@ -1,0 +1,15 @@
+{
+  "name": "weavetab-plugin-example",
+  "version": "1.0.0",
+  "description": "An enterprise template for building Weavetab plugins.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "weavetab build",
+    "dev": "weavetab dev"
+  },
+  "devDependencies": {
+    "@weavetab/sdk": "^1.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": ["weavetab", "plugin", "mcp"]
+}
