@@ -1,5 +1,5 @@
 {
-  "$schema": "https://weavetab.pages.dev/schema/plugin.json",
+  "$schema": "https://raw.githubusercontent.com/weavetab/sdk/main/schema/plugin.json",
   "name": "weavetab-plugin-example",
   "version": "1.0.0",
   "description": "An enterprise template for building Weavetab plugins.",
@@ -10,8 +10,11 @@
   "environments": [
     "mcp"
   ],
-  "permissions": [
-    "browser.evaluate",
-    "browser.navigate"
-  ]
+  "permissions": {
+    "cdp": {
+      "evaluate": true,
+      "navigate": true,
+      "reason": "Allows the plugin to run custom in-page automations and navigate tabs."
+    }
+  }
 }

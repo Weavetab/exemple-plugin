@@ -2,14 +2,24 @@
   "name": "weavetab-plugin-example",
   "version": "1.0.0",
   "description": "An enterprise template for building Weavetab plugins.",
+  "type": "module",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "weavetab build",
-    "dev": "weavetab dev"
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@weavetab/sdk": "^2.5.0-beta.2"
   },
   "devDependencies": {
-    "@weavetab/sdk": "^1.0.0",
     "typescript": "^5.0.0"
   },
-  "keywords": ["weavetab", "plugin", "mcp"]
+  "keywords": [
+    "weavetab",
+    "plugin",
+    "mcp"
+  ],
+  "license": "MIT"
 }
