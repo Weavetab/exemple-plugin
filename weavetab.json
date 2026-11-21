@@ -1,20 +1,44 @@
 {
-  "$schema": "https://raw.githubusercontent.com/weavetab/sdk/main/schema/plugin.json",
+  "$schema": "https://weavetab.dev/schema/plugin.json",
   "name": "weavetab-plugin-example",
-  "version": "1.0.0",
-  "description": "An enterprise template for building Weavetab plugins.",
-  "engines": {
-    "weavetab": "^2.5.0",
-    "node": ">=20.19.0"
+  "displayName": "Example Plugin",
+  "description": "Reference plugin demonstrating MCP tools, isolated storage, and HUD feedback.",
+  "instructions": "Reference plugin demonstrating MCP tools, isolated storage, and HUD feedback. Use example_hello_world with name parameter to greet and track run counts.",
+  "entry": "dist/index.js",
+  "defaultConfig": {
+    "enableHud": true
   },
-  "environments": [
-    "mcp"
-  ],
   "permissions": {
-    "cdp": {
-      "evaluate": true,
-      "navigate": true,
-      "reason": "Allows the plugin to run custom in-page automations and navigate tabs."
+    "config": {
+      "read": true,
+      "write": true,
+      "reason": "Reads isolated plugin preferences (HUD toggle)."
+    },
+    "extension": {
+      "hud": true,
+      "reason": "Shows greeting thought bubble on the active tab."
+    },
+    "tools": {
+      "add": true,
+      "reason": "Registers the example_hello_world tool."
     }
-  }
+  },
+  "tools": [
+    {
+      "name": "example_hello_world",
+      "description": "Greet a user or agent and increment a persistent run counter",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the user or agent to greet"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    }
+  ]
 }

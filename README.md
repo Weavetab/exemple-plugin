@@ -1,166 +1,142 @@
-# WeaveTab Example Plugin (`weavetab-plugin-example`)
+# `weavetab-plugin-example`
 
-> Official reference plugin and starter template for developing custom Model Context Protocol (MCP) tools and plugins for the **[WeaveTab](https://github.com/Weavetab)** ecosystem.
+Reference plugin built with `@weavetab/sdk` (`weavetab init --template standard`) for [Weavetab](https://weavetab.dev).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
-[![Engine: WeaveTab ^2.5.0](https://img.shields.io/badge/engine-weavetab_%5E2.5.0-black.svg?style=flat-square)](https://github.com/weavetab/mcp)
+[![SDK: @weavetab/sdk ^2.6.4](https://img.shields.io/badge/sdk-%40weavetab%2Fsdk_%5E2.6.4-black.svg?style=flat-square)](https://weavetab.dev)
 [![TypeScript: 5.x](https://img.shields.io/badge/TypeScript-5.x-3178c6.svg?style=flat-square)](https://www.typescriptlang.org/)
 
----
+## What this is
 
-## ⚡ Overview
+A minimal standard-template plugin. It registers one MCP tool (`example_hello_world`), persists a run counter in isolated storage, and optionally shows a HUD thought bubble when a browser session is active.
 
-WeaveTab plugins extend the runtime capabilities of the WeaveTab MCP server. They allow developers and enterprise teams to:
-- **Register Custom MCP Tools**: Expose new automation actions, internal API queries, or domain flows directly to AI coding agents (Claude, Antigravity, Cursor, Cline).
-- **Access Isolated Sandboxed Storage**: Persist plugin-specific configuration and telemetry counters without polluting global server state.
-- **Provide Visual Feedback**: Display thought bubbles and update the Browser HUD directly on the user's active Chromium tab.
-- **Enforce Permission Scopes**: Explicitly declare CDP and system permissions via `weavetab.json`.
-
----
-
-## 📁 Repository Structure
-
-```text
-weavetab-plugin-example/
-├── src/
-│   └── index.ts          # Plugin implementation, lifecycle hooks & tool registrations
-├── dist/                 # Compiled JavaScript and TypeScript declarations (.d.ts)
-├── package.json          # Package manifest and npm build scripts
-├── tsconfig.json         # Strict TypeScript compiler options
-├── weavetab.json         # WeaveTab plugin manifest & security permissions
-└── README.md             # Developer guide and documentation
-```
-
----
-
-## 🚀 Getting Started
-
-### 1. Requirements
-
-- **Node.js**: `>= 20.19.0`
-- **WeaveTab MCP**: `>= 2.5.0`
-- **TypeScript**: `^5.0.0`
-
-### 2. Installation & Setup
-
-Clone this repository or use it as a GitHub template:
+To start a new plugin, scaffold it with the SDK CLI:
 
 ```bash
-git clone https://github.com/Weavetab/exemple-plugin.git my-plugin
+npx -y @weavetab/sdk init my-plugin --template standard
 cd my-plugin
 npm install
-```
-
-### 3. Compile the Plugin
-
-Compile the TypeScript source into the distribution bundle:
-
-```bash
 npm run build
 ```
 
-For continuous compilation during development:
+## Requirements
 
-```bash
-npm run dev
+- Node.js `>= 20.19.0`
+- `@weavetab/sdk` `^2.6.4`
+- TypeScript `^5.3.0`
+
+## Structure
+
+```text
+weavetab-plugin-example/
+├── src/index.ts      # definePlugin({ name, onLoad, onUnload }) + registerTool
+├── weavetab.json     # manifest ($schema, permissions with reasons, tools)
+├── package.json      # weavetab build/dev/validate/doctor/release scripts
+├── tsconfig.json     # strict ES2022 / NodeNext
+├── test/             # node:test manifest + handler tests
+└── dist/             # compiled output (generated)
 ```
 
----
+## SDK commands
 
-## 🛠️ Plugin Architecture
+Run `weavetab help` to see all available commands:
 
-### 1. Manifest Declaration (`weavetab.json`)
+```bash
+npm run build      # weavetab build (tsc + sync weavetab.json)
+npm run dev        # weavetab dev (watch mode)
+npm run validate   # weavetab validate [--offline] (manifest + schema check)
+npm run doctor     # weavetab doctor (env + schema + registry check)
+npm run release    # weavetab-sdk publish [--dry-run] (npm publish + sync to weavetab.dev)
+weavetab templates # list all 5 templates
+```
 
-Every plugin requires a `weavetab.json` manifest at its root describing its identity and security permissions:
+## Templates
+
+| Template | Command | Included |
+|---|---|---|
+| `standard` | `weavetab init x --template standard` | Tools, isolated storage, HUD feedback (this repo) |
+| `visual` | `weavetab init x --template visual` | `highlight_elements` HUD/badge/style injector |
+| `scraper` | `weavetab init x --template scraper` | `extract_table_data` DOM scraper + JSON storage |
+| `automation` | `weavetab init x --template automation` | `run_automation` multi-step workflow |
+| `override` | `weavetab init x --template override` | `overrideTool` + `beforeToolCall` interceptor |
+
+Unknown `--template` values exit non-zero and print the template table.
+
+## Manifest (`weavetab.json`)
+
+Permissions are declared in `weavetab.json`, not in source code. Package metadata (`version`, `author`, `license`, `engines`) lives in `package.json`.
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/weavetab/sdk/main/schema/plugin.json",
+  "$schema": "https://weavetab.dev/schema/plugin.json",
   "name": "weavetab-plugin-example",
-  "version": "1.0.0",
-  "description": "An enterprise template for building Weavetab plugins.",
-  "engines": {
-    "weavetab": "^2.5.0",
-    "node": ">=20.19.0"
+  "displayName": "Example Plugin",
+  "description": "Reference plugin demonstrating MCP tools, isolated storage, and HUD feedback.",
+  "entry": "dist/index.js",
+  "defaultConfig": {
+    "enableHud": true
   },
-  "environments": [
-    "mcp"
-  ],
   "permissions": {
-    "cdp": {
-      "evaluate": true,
-      "navigate": true,
-      "reason": "Allows the plugin to run custom in-page automations and navigate tabs."
-    }
+    "config": { "read": true, "write": true, "reason": "Reads isolated plugin preferences (HUD toggle)." },
+    "extension": { "hud": true, "reason": "Shows greeting thought bubble on the active tab." },
+    "tools": { "add": true, "reason": "Registers the example_hello_world tool." }
   }
 }
 ```
 
-### 2. Plugin Entry Point (`src/index.ts`)
+Schema: [weavetab.dev/schema/plugin.json](https://weavetab.dev/schema/plugin.json)
 
-The entry point exports a default class implementing the `WeavetabPlugin` interface:
+## Entry point (`src/index.ts`)
+
+Default-export `definePlugin(...)`. `onLoad` receives `ctx` (`mcp`, `cli`, `storage`, `extension`, `config`, `hooks`, `logger`):
 
 ```typescript
-import { WeavetabPlugin, PluginContext } from "@weavetab/sdk";
+import { definePlugin, defineTool, z, type PluginContext } from "@weavetab/sdk";
 
-export default class ExamplePlugin implements WeavetabPlugin {
-  name = "weavetab-plugin-example";
-
-  async onLoad(ctx: PluginContext): Promise<void> {
-    // Register custom tool
-    ctx.mcp.registerTool({
-      name: "example_hello_world",
-      description: "A sample tool injected by the example plugin",
-      schema: {
-        type: "object",
-        properties: {
-          name: { type: "string", description: "The name to greet" }
+export default definePlugin({
+  name: "weavetab-plugin-example",
+  async onLoad(ctx: PluginContext) {
+    ctx.mcp.registerTool(
+      defineTool({
+        name: "example_hello_world",
+        description: "Greet a user or agent and increment a persistent run counter",
+        schema: {
+          name: z.string().describe("The name of the user or agent to greet"),
         },
-        required: ["name"]
-      },
-      handler: async (args: { name: string }, session: any) => {
-        // Sandboxed storage
-        const runs = ((await ctx.storage.get<number>("runs", 0)) || 0) + 1;
-        await ctx.storage.set("runs", runs);
-
-        // Visual feedback on active tab
-        if (ctx.extension && session) {
-          await ctx.extension.showThought(
-            session,
-            `Greeting ${args.name} (run #${runs})`,
-            { durationMs: 3000 }
-          );
-        }
-
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Hello, ${args.name}! (execution #${runs})`
-            }
-          ]
-        };
-      }
-    });
-  }
-
-  async onUnload(ctx: PluginContext): Promise<void> {
-    // Perform cleanup when plugin is deactivated
-  }
-}
+        handler: async (args, session) => {
+          const runs = ((await ctx.storage.get<number>("runs", 0)) || 0) + 1;
+          await ctx.storage.set("runs", runs);
+          if (ctx.config?.enableHud && ctx.extension && session) {
+            await ctx.extension.showThought(session, `Greeting ${args.name} (execution #${runs})`, { durationMs: 3000 });
+          }
+          return { content: [{ type: "text", text: `Hello, ${args.name}! (execution #${runs})` }] };
+        },
+      })
+    );
+  },
+});
 ```
 
----
+Tool schemas use a Zod raw shape (`{ name: z.string() }`) so the runtime validates input and `weavetab build` exports JSON Schema into `weavetab.json`.
 
-## 🧪 Testing Your Plugin
+## Testing
 
-Once compiled (`npm run build`), load the plugin into your running WeaveTab MCP session:
+```bash
+npm test
+```
 
-1. **Via MCP Tool**: Call `load_plugin` with the absolute path to your plugin directory.
-2. **Via Configuration**: Add your plugin path to your local `~/.weavetab/plugins/` directory.
+## Loading into Weavetab
 
----
+1. Run `npm run build`
+2. Install into the runtime: `weavetab plugin add ./` (or `weavetab plugin add weavetab-plugin-example` once published)
 
-## 📄 License
+## Publish
 
-MIT &copy; [WeaveTab Organization](https://github.com/Weavetab) & [fy2ne](https://github.com/fy2ne)
+```bash
+weavetab publish --dry-run
+weavetab publish
+```
+
+## License
+
+MIT © [Weavetab](https://github.com/Weavetab) & [fy2ne](https://github.com/fy2ne)
